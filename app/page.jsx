@@ -754,7 +754,7 @@ export default function PadelCoachV1App() {
                 <Dumbbell className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-3xl font-semibold tracking-tight">PadelCoach V1</h1>
+                <h1 className="text-3xl font-semibold tracking-tight">PadelCoach V2 demo</h1>
                 <p className="text-sm text-muted-foreground">
                   Plateforme de suivi padel avec import montre, analyse IA et synchronisation Google Sheets.
                 </p>
