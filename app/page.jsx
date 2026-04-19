@@ -15,6 +15,10 @@ import {
   AlertCircle,
   Dumbbell,
   Target,
+  Sparkles,
+  Brain,
+  Zap,
+  TrendingUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,6 +81,17 @@ const mockImports = [
     fcMax: 164,
     distance: 3.4,
   },
+  {
+    source: "Apple Health / Watch",
+    date: "2026-04-12",
+    heureDebut: "10:15",
+    heureFin: "11:35",
+    duree: 80,
+    calories: 648,
+    fcMoy: 142,
+    fcMax: 176,
+    distance: 4.5,
+  },
 ];
 
 const initialSessions = [
@@ -97,7 +112,7 @@ const initialSessions = [
     resultat: "Victoire",
     fatigueAvant: 3,
     fatigueApres: 7,
-    notes: "Bonne intensité, service solide.",
+    notes: "Bonne intensité, service solide, gestion mentale correcte dans le super tie-break.",
     forme: {
       id: "F_20260419_001",
       fcRepos: 58,
@@ -111,23 +126,123 @@ const initialSessions = [
     resume: {
       scoreFinal: "6/4 3/6 10/7",
       resultatMatch: "Victoire",
-      volumeCoups: 0,
-      typeDominant: "",
-      vitesseMoyRaquette: "",
-      fautesDirectes: 0,
+      volumeCoups: 182,
+      typeDominant: "Volée de coup droit",
+      vitesseMoyRaquette: "78 km/h",
+      fautesDirectes: 11,
       fcMoyenne: 138,
       niveauFatigue: 7,
       pointsOrGagnes: 2,
     },
     conseils: {
       priorite: "Moyenne",
-      technique: "Travaille la première volée après service.",
-      tactique: "Monte plus tôt au filet sur balle courte.",
-      physique: "Conserve ton intensité cardio sur le second set.",
-      recuperation: "Hydratation et 10 min de retour au calme.",
+      technique: "Travaille la première volée après service pour sécuriser la montée.",
+      tactique: "Monte plus tôt au filet sur balle courte pour imposer le rythme.",
+      physique: "Conserve l’intensité cardio au début du second set.",
+      recuperation: "Hydratation, retour au calme 10 min et mobilité épaules/ischios.",
       pointFort: "Bon service dans les points importants.",
       pointFaible: "Transitions fond-filet encore hésitantes.",
-      objectif: "Mieux convertir les balles d'attaque.",
+      objectif: "Mieux convertir les balles d’attaque.",
+    },
+  },
+  {
+    id: "S_20260416_002",
+    joueurId: "J_001",
+    date: "2026-04-16",
+    heureDebut: "20:05",
+    heureFin: "21:00",
+    duree: 55,
+    club: "Urban Padel",
+    typeTerrain: "Indoor",
+    typeSession: "Entraînement",
+    partenaire: "Thomas",
+    adv1: "",
+    adv2: "",
+    score: "",
+    resultat: "Victoire",
+    fatigueAvant: 2,
+    fatigueApres: 5,
+    notes: "Séance de rythme et volées. Bonne qualité technique globale.",
+    forme: {
+      id: "F_20260416_002",
+      fcRepos: 56,
+      fcMax: 164,
+      fcMoy: 131,
+      calories: 455,
+      stress: 3,
+      douleurs: "Non",
+      zoneDouleur: "",
+    },
+    resume: {
+      scoreFinal: "",
+      resultatMatch: "Victoire",
+      volumeCoups: 145,
+      typeDominant: "Bandeja",
+      vitesseMoyRaquette: "74 km/h",
+      fautesDirectes: 7,
+      fcMoyenne: 131,
+      niveauFatigue: 5,
+      pointsOrGagnes: 0,
+    },
+    conseils: {
+      priorite: "Faible",
+      technique: "Bonne stabilité sur bandeja, garde le même relâchement sur vibora.",
+      tactique: "Travaille la variation de profondeur après la vitre.",
+      physique: "RAS, charge bien tolérée.",
+      recuperation: "Routine légère, sommeil normal.",
+      pointFort: "Qualité de balle au filet.",
+      pointFaible: "Lobs défensifs parfois trop courts.",
+      objectif: "Allonger les trajectoires défensives.",
+    },
+  },
+  {
+    id: "S_20260412_003",
+    joueurId: "J_001",
+    date: "2026-04-12",
+    heureDebut: "10:15",
+    heureFin: "11:35",
+    duree: 80,
+    club: "Casa Padel",
+    typeTerrain: "Outdoor",
+    typeSession: "Match",
+    partenaire: "Lucas",
+    adv1: "Yann",
+    adv2: "Mehdi",
+    score: "4/6 6/3 10/8",
+    resultat: "Victoire",
+    fatigueAvant: 4,
+    fatigueApres: 8,
+    notes: "Match engagé, très bonne réaction après un premier set subi.",
+    forme: {
+      id: "F_20260412_003",
+      fcRepos: 59,
+      fcMax: 176,
+      fcMoy: 142,
+      calories: 648,
+      stress: 5,
+      douleurs: "Oui",
+      zoneDouleur: "Épaule droite légère",
+    },
+    resume: {
+      scoreFinal: "4/6 6/3 10/8",
+      resultatMatch: "Victoire",
+      volumeCoups: 214,
+      typeDominant: "Retour croisé",
+      vitesseMoyRaquette: "81 km/h",
+      fautesDirectes: 15,
+      fcMoyenne: 142,
+      niveauFatigue: 8,
+      pointsOrGagnes: 4,
+    },
+    conseils: {
+      priorite: "Haute",
+      technique: "Travaille le relâchement sur les frappes hautes en fin de match.",
+      tactique: "Très bonne lecture croisée, continue à fixer puis accélérer long de ligne.",
+      physique: "Surveille la fatigue de l’épaule quand la charge dépasse 75 min.",
+      recuperation: "Glace locale, mobilité douce et nuit de récupération complète.",
+      pointFort: "Réaction mentale après la perte du premier set.",
+      pointFaible: "Fautes directes sous fatigue.",
+      objectif: "Mieux tenir la qualité technique au-delà de 70 min.",
     },
   },
 ];
@@ -369,6 +484,82 @@ function draftToSession(draft, profile) {
   };
 }
 
+function computeAiSummary(session) {
+  if (!session) {
+    return {
+      performance: 0,
+      style: "-",
+      fatigueRisk: "-",
+      priority: "-",
+      insight: "-",
+    };
+  }
+
+  const performanceBase =
+    72 +
+    (session.resultat === "Victoire" ? 10 : 0) +
+    Math.max(0, 8 - Number(session.resume?.fautesDirectes || 0));
+
+  const performance = Math.min(96, Math.max(58, performanceBase));
+
+  let fatigueRisk = "Faible";
+  if (Number(session.fatigueApres || 0) >= 8) fatigueRisk = "Élevé";
+  else if (Number(session.fatigueApres || 0) >= 6) fatigueRisk = "Modéré";
+
+  const style =
+    session.resume?.typeDominant
+      ? `Dominante ${session.resume.typeDominant.toLowerCase()}`
+      : "Offensif côté droit";
+
+  const priority =
+    session.conseils?.objectif ||
+    "Stabiliser la transition défense → attaque";
+
+  const insight =
+    session.resultat === "Victoire"
+      ? "Bonne gestion des points importants et capacité à accélérer au bon moment."
+      : "Base solide, mais efficacité insuffisante dans les points clés.";
+
+  return {
+    performance,
+    style,
+    fatigueRisk,
+    priority,
+    insight,
+  };
+}
+
+const fakeAiSuggestions = [
+  {
+    technique:
+      "Travaille la première volée après service avec une cible croisée pour sécuriser la montée.",
+    tactique:
+      "Dès que la balle adverse flotte, prends le filet plus tôt pour verrouiller l’échange.",
+    physique:
+      "Surveille la baisse d’intensité à partir de 45 minutes et garde un premier appui plus explosif.",
+    recuperation:
+      "Hydratation + 10 min de retour au calme + mobilité épaule/hanche en post-séance.",
+    pointFort: "Bonne qualité de balle dans les phases offensives.",
+    pointFaible: "Transitions défensives encore trop passives.",
+    objectif: "Gagner le filet un coup plus tôt sur les échanges neutres.",
+    priorite: "Haute",
+  },
+  {
+    technique:
+      "Rends ta bandeja plus profonde pour empêcher la relance agressive au centre.",
+    tactique:
+      "Fixe davantage en diagonale avant d’ouvrir long de ligne sur balle courte.",
+    physique:
+      "Améliore le replacement après smash pour conserver la pression sur le point suivant.",
+    recuperation:
+      "Routine de récupération courte : respiration, marche active, hydratation, étirements doux.",
+    pointFort: "Lecture du jeu et choix de zone pertinents.",
+    pointFaible: "Qualité technique qui baisse sous fatigue.",
+    objectif: "Réduire les fautes directes en fin de set.",
+    priorite: "Moyenne",
+  },
+];
+
 export default function PadelCoachV1App() {
   const [profile, setProfile] = useState(initialProfile);
   const [sessions, setSessions] = useState(initialSessions);
@@ -382,14 +573,14 @@ export default function PadelCoachV1App() {
     club: "Padel Center Paris",
     typeTerrain: "Indoor",
     typeSession: "Match",
-    partenaire: "",
-    adv1: "",
-    adv2: "",
-    score: "",
+    partenaire: "Lucas",
+    adv1: "Sam",
+    adv2: "Nico",
+    score: "4/6 6/3 10/8",
     resultat: "Victoire",
     fatigueAvant: "3",
     fatigueApres: "7",
-    notes: "",
+    notes: "Match intense avec bonne remontée mentale.",
     forme: {
       id: "",
       fcRepos: "58",
@@ -401,11 +592,11 @@ export default function PadelCoachV1App() {
       zoneDouleur: "",
     },
     resume: {
-      volumeCoups: "0",
-      typeDominant: "",
-      vitesseMoyRaquette: "",
-      fautesDirectes: "0",
-      pointsOrGagnes: "0",
+      volumeCoups: "176",
+      typeDominant: "Volée de coup droit",
+      vitesseMoyRaquette: "79 km/h",
+      fautesDirectes: "10",
+      pointsOrGagnes: "3",
     },
     conseils: {
       priorite: "Moyenne",
@@ -424,9 +615,11 @@ export default function PadelCoachV1App() {
   const [webhookSecret, setWebhookSecret] = useState(WEBHOOK_SECRET_DEFAULT);
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState({ type: "idle", message: "Prêt" });
+  const [generatingAi, setGeneratingAi] = useState(false);
 
   const stats = useMemo(() => computeStats(sessions), [sessions]);
   const activeSession = sessions.find((s) => s.id === activeId) || sessions[0];
+  const aiSummary = useMemo(() => computeAiSummary(activeSession), [activeSession]);
 
   const onProfileChange = (key, value) => setProfile((p) => ({ ...p, [key]: value }));
 
@@ -446,6 +639,31 @@ export default function PadelCoachV1App() {
       },
     }));
     setStatus({ type: "success", message: `Session importée depuis ${item.source}` });
+  };
+
+  const generateAiAdvice = async () => {
+    setGeneratingAi(true);
+    setStatus({ type: "idle", message: "Analyse IA en cours..." });
+
+    await new Promise((resolve) => setTimeout(resolve, 1600));
+
+    const suggestion =
+      fakeAiSuggestions[Math.floor(Math.random() * fakeAiSuggestions.length)];
+
+    setDraft((prev) => ({
+      ...prev,
+      conseils: {
+        ...prev.conseils,
+        ...suggestion,
+      },
+    }));
+
+    setGeneratingAi(false);
+    setStatus({
+      type: "success",
+      message:
+        "Analyse IA terminée : axes de progression et recommandations générés.",
+    });
   };
 
   const saveDraftAsSession = () => {
@@ -538,13 +756,13 @@ export default function PadelCoachV1App() {
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight">PadelCoach V1</h1>
                 <p className="text-sm text-muted-foreground">
-                  Application métier pour connecter la montre, compléter le match et
-                  pousser les données vers Google Sheets.
+                  Plateforme de suivi padel avec import montre, analyse IA et synchronisation Google Sheets.
                 </p>
               </div>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">Analyse IA</Badge>
             <Badge variant="secondary">Backend Google Sheets</Badge>
             <Badge variant="secondary">Webhook Apps Script</Badge>
             <Badge variant="secondary">V1 mobile/web</Badge>
@@ -622,39 +840,59 @@ export default function PadelCoachV1App() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-3xl shadow-sm">
+              <Card className="rounded-3xl border shadow-sm">
                 <CardHeader>
-                  <CardTitle>Progression</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Brain className="h-5 w-5" />
+                    Analyse IA
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-5">
-                  <ProgressRow
-                    label="Taux de victoire"
-                    value={stats.tauxVictoire}
-                    suffix="%"
-                  />
-                  <ProgressRow
-                    label="Régularité cardio"
-                    value={Math.min(
-                      100,
-                      Math.max(0, 100 - Math.abs((stats.fcMoy || 0) - 140))
-                    )}
-                    suffix="/100"
-                  />
-                  <ProgressRow
-                    label="Charge moyenne"
-                    value={Math.min(100, stats.fatigueMoy * 10)}
-                    suffix="/100"
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <MetricCard title="Indice performance" value={`${aiSummary.performance}/100`} />
+                    <MetricCard title="Risque fatigue" value={aiSummary.fatigueRisk} />
+                    <MetricCard title="Style dominant" value={aiSummary.style} />
+                    <MetricCard title="Priorité" value={activeSession?.conseils?.priorite || "-"} />
+                  </div>
                   <div className="rounded-2xl border p-4">
-                    <p className="text-sm font-medium">Objectif prochaine session</p>
+                    <p className="text-sm font-medium">Synthèse intelligente</p>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      {activeSession?.conseils?.objectif ||
-                        "Définis un objectif pour la prochaine séance."}
+                      {aiSummary.insight}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border p-4">
+                    <p className="text-sm font-medium">Recommandation prioritaire</p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {aiSummary.priority}
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </div>
+
+            <Card className="rounded-3xl shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Tendance des 3 dernières sessions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-3">
+                {sessions.slice(0, 3).map((session) => (
+                  <div key={session.id} className="rounded-2xl border p-4">
+                    <p className="text-sm text-muted-foreground">
+                      {formatDateDisplay(session.date)}
+                    </p>
+                    <p className="mt-2 text-lg font-semibold">{session.typeSession}</p>
+                    <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+                      <p>FC moyenne : {session.forme?.fcMoy}</p>
+                      <p>Fatigue : {session.fatigueApres}/10</p>
+                      <p>Volume : {session.resume?.volumeCoups || 0} coups</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="profil" className="space-y-4">
@@ -819,6 +1057,21 @@ export default function PadelCoachV1App() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    className="rounded-2xl"
+                    variant="secondary"
+                    onClick={generateAiAdvice}
+                    disabled={generatingAi}
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {generatingAi ? "Analyse en cours..." : "Générer conseils IA"}
+                  </Button>
+                  <Badge variant="secondary" className="px-3 py-1">
+                    Demo mode IA assistée
+                  </Badge>
+                </div>
+
                 <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                   <Field label="Date">
                     <Input
@@ -1080,6 +1333,18 @@ export default function PadelCoachV1App() {
                   </Field>
                 </section>
 
+                <Field label="Objectif prochaine session">
+                  <Textarea
+                    value={draft.conseils.objectif}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        conseils: { ...draft.conseils, objectif: e.target.value },
+                      })
+                    }
+                  />
+                </Field>
+
                 <Field label="Notes session">
                   <Textarea
                     value={draft.notes}
@@ -1269,6 +1534,8 @@ export default function PadelCoachV1App() {
                         <CheckCircle2 className="h-5 w-5" />
                       ) : status.type === "error" ? (
                         <AlertCircle className="h-5 w-5" />
+                      ) : generatingAi ? (
+                        <Zap className="h-5 w-5" />
                       ) : (
                         <Activity className="h-5 w-5" />
                       )}
@@ -1277,6 +1544,8 @@ export default function PadelCoachV1App() {
                           ? "Succès"
                           : status.type === "error"
                           ? "Erreur"
+                          : generatingAi
+                          ? "IA active"
                           : "Statut"}
                       </p>
                     </div>
