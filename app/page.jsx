@@ -23,6 +23,7 @@ import {
   Lock,
   Link2,
   Eye,
+  KeyRound,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,16 +40,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 
 const APP_NAME = "Padelscan Pro";
-const APP_VERSION = "V3 private demo";
+const APP_VERSION = "V4 private AI demo";
 const DEMO_ACCESS_TOKEN = "padelscan-pro-private-2026";
 const ACCESS_STORAGE_KEY = "padelscan_pro_demo_access";
-
-const WEBHOOK_URL_DEFAULT =
-  "https://script.google.com/macros/s/AKfycbyIpYLnkm4Z5HqLEcaCwpit0HdDo7FKsOO6Hf8f2zNmUt_HuTtTCr8nrjtUzqgrF4_o/exec";
-const WEBHOOK_SECRET_DEFAULT = "padelcoach_2026_x9KpA71mZqL_secure";
 
 const initialProfile = {
   idJoueur: "J_001",
@@ -198,7 +194,8 @@ const initialSessions = [
     },
     conseils: {
       priorite: "Faible",
-      technique: "Bonne stabilité sur bandeja, garde le même relâchement sur vibora.",
+      technique:
+        "Bonne stabilité sur bandeja, garde le même relâchement sur vibora.",
       tactique: "Travaille la variation de profondeur après la vitre.",
       physique: "RAS, charge bien tolérée.",
       recuperation: "Routine légère, sommeil normal.",
@@ -306,11 +303,10 @@ function computeStats(sessions) {
   };
 }
 
-function buildPayload(profile, session, webhookSecret) {
+function buildPayload(profile, session) {
   const ids = buildIds(session.date);
 
   return {
-    secret: webhookSecret,
     JOUEURS: [
       {
         ID_Joueur: profile.idJoueur,
@@ -519,9 +515,10 @@ function computeAiSummary(session) {
   if (Number(session.fatigueApres || 0) >= 8) fatigueRisk = "Élevé";
   else if (Number(session.fatigueApres || 0) >= 6) fatigueRisk = "Modéré";
 
-  const style = session.resume?.typeDominant
-    ? `Dominante ${session.resume.typeDominant.toLowerCase()}`
-    : "Offensif côté droit";
+  const style =
+    session.resume?.typeDominant
+      ? `Dominante ${session.resume.typeDominant.toLowerCase()}`
+      : "Offensif côté droit";
 
   const priority =
     session.conseils?.objectif || "Stabiliser la transition défense → attaque";
@@ -539,51 +536,6 @@ function computeAiSummary(session) {
     insight,
   };
 }
-
-const fakeAiSuggestions = [
-  {
-    technique:
-      "Travaille la première volée après service avec une cible croisée pour sécuriser la montée.",
-    tactique:
-      "Dès que la balle adverse flotte, prends le filet plus tôt pour verrouiller l’échange.",
-    physique:
-      "Surveille la baisse d’intensité à partir de 45 minutes et garde un premier appui plus explosif.",
-    recuperation:
-      "Hydratation + 10 min de retour au calme + mobilité épaule/hanche en post-séance.",
-    pointFort: "Bonne qualité de balle dans les phases offensives.",
-    pointFaible: "Transitions défensives encore trop passives.",
-    objectif: "Gagner le filet un coup plus tôt sur les échanges neutres.",
-    priorite: "Haute",
-  },
-  {
-    technique:
-      "Rends ta bandeja plus profonde pour empêcher la relance agressive au centre.",
-    tactique:
-      "Fixe davantage en diagonale avant d’ouvrir long de ligne sur balle courte.",
-    physique:
-      "Améliore le replacement après smash pour conserver la pression sur le point suivant.",
-    recuperation:
-      "Routine de récupération courte : respiration, marche active, hydratation, étirements doux.",
-    pointFort: "Lecture du jeu et choix de zone pertinents.",
-    pointFaible: "Qualité technique qui baisse sous fatigue.",
-    objectif: "Réduire les fautes directes en fin de set.",
-    priorite: "Moyenne",
-  },
-  {
-    technique:
-      "Stabilise ton contact de balle sur les volées de transition pour sécuriser la prise du filet.",
-    tactique:
-      "Cherche plus souvent la zone revers adverse avant d’accélérer long de ligne.",
-    physique:
-      "Maintiens une intensité stable sur les changements d’appui du second set.",
-    recuperation:
-      "Hydratation, respiration basse et mobilité hanche/épaule pendant 8 minutes.",
-    pointFort: "Capacité à reprendre l’initiative dans les points serrés.",
-    pointFaible: "Qualité de replacement après frappe haute.",
-    objectif: "Améliorer la transition attaque → couverture du lob.",
-    priorite: "Haute",
-  },
-];
 
 function getShareLink() {
   if (typeof window === "undefined") return "";
@@ -608,7 +560,7 @@ function grantAccess() {
   window.localStorage.setItem(ACCESS_STORAGE_KEY, DEMO_ACCESS_TOKEN);
 }
 
-export default function PadelscanProV3App() {
+export default function PadelscanProV4NoStorageKeyApp() {
   const [profile, setProfile] = useState(initialProfile);
   const [sessions, setSessions] = useState(initialSessions);
   const [selectedImport, setSelectedImport] = useState(mockImports[0]);
@@ -659,8 +611,6 @@ export default function PadelscanProV3App() {
   });
 
   const [activeId, setActiveId] = useState(initialSessions[0]?.id || "");
-  const [webhookUrl, setWebhookUrl] = useState(WEBHOOK_URL_DEFAULT);
-  const [webhookSecret, setWebhookSecret] = useState(WEBHOOK_SECRET_DEFAULT);
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState({ type: "idle", message: "Prêt" });
   const [generatingAi, setGeneratingAi] = useState(false);
@@ -669,6 +619,10 @@ export default function PadelscanProV3App() {
   const [hasAccess, setHasAccess] = useState(false);
   const [accessInput, setAccessInput] = useState("");
   const [accessReady, setAccessReady] = useState(false);
+
+  const [aiProvider, setAiProvider] = useState("openai");
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [showApiKey, setShowApiKey] = useState(false);
 
   const stats = useMemo(() => computeStats(sessions), [sessions]);
   const activeSession = sessions.find((s) => s.id === activeId) || sessions[0];
@@ -730,28 +684,68 @@ export default function PadelscanProV3App() {
   };
 
   const generateAiAdvice = async () => {
+    const error = validateDraft(draft);
+    if (error) {
+      setStatus({ type: "error", message: error });
+      return;
+    }
+
+    if (!apiKeyInput.trim()) {
+      setStatus({
+        type: "error",
+        message: "Entre une clé API avant de lancer l’analyse IA.",
+      });
+      return;
+    }
+
     setGeneratingAi(true);
     setStatus({ type: "idle", message: "Analyse IA en cours..." });
 
-    await new Promise((resolve) => setTimeout(resolve, 1600));
+    try {
+      const sessionToAnalyze = draftToSession(draft, profile);
 
-    const suggestion =
-      fakeAiSuggestions[Math.floor(Math.random() * fakeAiSuggestions.length)];
+      const res = await fetch("/api/generate-coaching", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          provider: aiProvider,
+          apiKey: apiKeyInput,
+          profile,
+          session: sessionToAnalyze,
+        }),
+      });
 
-    setDraft((prev) => ({
-      ...prev,
-      conseils: {
-        ...prev.conseils,
-        ...suggestion,
-      },
-    }));
+      const data = await res.json();
 
-    setGeneratingAi(false);
-    setStatus({
-      type: "success",
-      message:
-        "Analyse IA terminée : axes de progression et recommandations générés.",
-    });
+      if (!res.ok || !data?.success || !data?.coaching) {
+        throw new Error(data?.error || "Impossible de générer les recommandations IA.");
+      }
+
+      setDraft((prev) => ({
+        ...prev,
+        conseils: {
+          ...prev.conseils,
+          ...data.coaching,
+        },
+      }));
+
+      setStatus({
+        type: "success",
+        message:
+          data?.provider_used
+            ? `Analyse IA terminée via ${data.provider_used}.`
+            : "Analyse IA terminée : recommandations générées.",
+      });
+    } catch (error) {
+      setStatus({
+        type: "error",
+        message: String(error?.message || error),
+      });
+    } finally {
+      setGeneratingAi(false);
+    }
   };
 
   const saveDraftAsSession = () => {
@@ -789,30 +783,25 @@ export default function PadelscanProV3App() {
 
     try {
       const sessionToSend = draftToSession(draft, profile);
-      const payload = buildPayload(profile, sessionToSend, webhookSecret);
+      const payload = buildPayload(profile, sessionToSend);
 
-      const res = await fetch(webhookUrl, {
+      const res = await fetch("/api/padel-sync", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       });
 
-      const text = await res.text();
-      let parsed;
+      const data = await res.json();
 
-      try {
-        parsed = JSON.parse(text);
-      } catch {
-        parsed = { success: res.ok, raw: text };
-      }
-
-      if (!res.ok || parsed?.success === false) {
-        throw new Error(parsed?.error || parsed?.message || `HTTP ${res.status}`);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || "Échec de la synchronisation.");
       }
 
       setStatus({
         type: "success",
-        message: parsed?.message || "Données envoyées avec succès.",
+        message: data?.result?.message || "Données envoyées avec succès.",
       });
     } catch (error) {
       setStatus({ type: "error", message: String(error?.message || error) });
@@ -846,20 +835,9 @@ export default function PadelscanProV3App() {
                   <Badge variant="secondary">Accès privé</Badge>
                   <h1 className="text-3xl font-semibold tracking-tight">{APP_NAME}</h1>
                   <p className="text-sm text-muted-foreground">
-                    Démo privée à accès limité. Ouvre l’application avec le lien privé complet
-                    ou saisis le code d’accès ci-dessous.
+                    Démo privée à accès limité. Ouvre l’application avec le lien privé
+                    complet ou saisis le code d’accès ci-dessous.
                   </p>
-                </div>
-              </div>
-
-              <div className="mt-8 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border p-4">
-                  <p className="text-sm font-medium">Version</p>
-                  <p className="mt-2 text-sm text-muted-foreground">{APP_VERSION}</p>
-                </div>
-                <div className="rounded-2xl border p-4">
-                  <p className="text-sm font-medium">Accès</p>
-                  <p className="mt-2 text-sm text-muted-foreground">Lien privé ou code temporaire</p>
                 </div>
               </div>
 
@@ -885,7 +863,8 @@ export default function PadelscanProV3App() {
                   <p className="font-medium">Accès restreint</p>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Pour partager la démo, utilise uniquement le lien privé contenant le paramètre <code>k</code>.
+                  Pour partager la démo, utilise uniquement le lien privé contenant le
+                  paramètre <code>k</code>.
                 </p>
                 {status.message !== "Prêt" && (
                   <p className="mt-3 text-sm text-muted-foreground">{status.message}</p>
@@ -914,7 +893,8 @@ export default function PadelscanProV3App() {
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight">{APP_NAME}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Plateforme premium de suivi padel avec import montre, analyse IA et synchronisation Google Sheets.
+                  Plateforme premium de suivi padel avec IA à la demande, import montre
+                  et synchronisation Google Sheets.
                 </p>
               </div>
             </div>
@@ -922,7 +902,7 @@ export default function PadelscanProV3App() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{APP_VERSION}</Badge>
             <Badge variant="secondary">Accès limité</Badge>
-            <Badge variant="secondary">Analyse IA</Badge>
+            <Badge variant="secondary">Clé non stockée</Badge>
             <Badge variant="secondary">Google Sheets sync</Badge>
           </div>
         </motion.div>
@@ -942,6 +922,57 @@ export default function PadelscanProV3App() {
                 <Eye className="mr-2 h-3.5 w-3.5" />
                 Partage restreint
               </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-3xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5" />
+              Clé IA utilisateur
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-[220px_1fr_auto]">
+            <Field label="Fournisseur IA">
+              <Select value={aiProvider} onValueChange={setAiProvider}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">OpenAI</SelectItem>
+				  <SelectItem value="groq">Groq</SelectItem>
+                  <SelectItem value="xai">Grok / xAI</SelectItem>
+                  <SelectItem value="aiapi">AIAPI.world</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field label="Clé API">
+              <Input
+                type={showApiKey ? "text" : "password"}
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                placeholder="Colle ta clé API ici"
+                autoComplete="off"
+              />
+            </Field>
+
+            <div className="flex items-end gap-2">
+              <Button
+                className="rounded-2xl"
+                variant="secondary"
+                onClick={() => setShowApiKey((v) => !v)}
+              >
+                {showApiKey ? "Masquer" : "Afficher"}
+              </Button>
+            </div>
+
+            <div className="md:col-span-3 rounded-2xl border p-4">
+              <p className="text-sm text-muted-foreground">
+                La clé est utilisée uniquement au moment de l’appel IA. Elle n’est pas
+                stockée en base, ni dans Google Sheets, ni côté serveur.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -1010,7 +1041,9 @@ export default function PadelscanProV3App() {
                       </div>
                     </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Aucune session disponible.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Aucune session disponible.
+                    </p>
                   )}
                 </CardContent>
               </Card>
@@ -1031,11 +1064,15 @@ export default function PadelscanProV3App() {
                   </div>
                   <div className="rounded-2xl border p-4">
                     <p className="text-sm font-medium">Synthèse intelligente</p>
-                    <p className="mt-2 text-sm text-muted-foreground">{aiSummary.insight}</p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {aiSummary.insight}
+                    </p>
                   </div>
                   <div className="rounded-2xl border p-4">
                     <p className="text-sm font-medium">Recommandation prioritaire</p>
-                    <p className="mt-2 text-sm text-muted-foreground">{aiSummary.priority}</p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {aiSummary.priority}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -1239,7 +1276,7 @@ export default function PadelscanProV3App() {
                     {generatingAi ? "Analyse en cours..." : "Générer recommandations IA"}
                   </Button>
                   <Badge variant="secondary" className="px-3 py-1">
-                    Demo mode privé
+                    Clé fournie à la demande
                   </Badge>
                 </div>
 
@@ -1631,7 +1668,9 @@ export default function PadelscanProV3App() {
                       </div>
                     </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Sélectionne une session.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Sélectionne une session.
+                    </p>
                   )}
                 </CardContent>
               </Card>
@@ -1643,21 +1682,15 @@ export default function PadelscanProV3App() {
               <Card className="rounded-3xl shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" /> Configuration webhook
+                    <Settings className="h-5 w-5" /> Intégrations serveur
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Field label="Webhook URL">
-                    <Input
-                      value={webhookUrl}
-                      onChange={(e) => setWebhookUrl(e.target.value)}
-                    />
+                  <Field label="Canal de synchronisation">
+                    <Input value="/api/padel-sync" readOnly />
                   </Field>
-                  <Field label="Webhook secret">
-                    <Input
-                      value={webhookSecret}
-                      onChange={(e) => setWebhookSecret(e.target.value)}
-                    />
+                  <Field label="Sécurité">
+                    <Input value="Clé IA non stockée, secrets serveur protégés" readOnly />
                   </Field>
                   <div className="flex flex-wrap gap-3">
                     <Button
@@ -1666,7 +1699,7 @@ export default function PadelscanProV3App() {
                       disabled={sending}
                     >
                       <Send className="mr-2 h-4 w-4" />
-                      Tester l'envoi
+                      Tester la synchro serveur
                     </Button>
                     <Button
                       className="rounded-2xl"
@@ -1675,7 +1708,7 @@ export default function PadelscanProV3App() {
                         setStatus({
                           type: "idle",
                           message: JSON.stringify(
-                            buildPayload(profile, draftToSession(draft, profile), webhookSecret),
+                            buildPayload(profile, draftToSession(draft, profile)),
                             null,
                             2
                           ),
@@ -1766,21 +1799,6 @@ function Insight({ title, value }) {
     <div className="rounded-2xl border p-4">
       <p className="text-sm font-medium">{title}</p>
       <p className="mt-2 text-sm text-muted-foreground">{value || "Non renseigné"}</p>
-    </div>
-  );
-}
-
-function ProgressRow({ label, value, suffix }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
-        <span>{label}</span>
-        <span className="text-muted-foreground">
-          {value}
-          {suffix}
-        </span>
-      </div>
-      <Progress value={value} className="h-2" />
     </div>
   );
 }
