@@ -67,6 +67,20 @@ function safeJsonParse(text) {
   }
 }
 
+function extractJsonObject(text) {
+  if (!text) return null;
+
+  const direct = safeJsonParse(text);
+  if (direct) return direct;
+
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+
+  const sliced = text.slice(start, end + 1);
+  return safeJsonParse(sliced);
+}
+
 function normalizeCoaching(data) {
   return {
     priorite: ["Faible", "Moyenne", "Haute"].includes(data?.priorite)
@@ -117,7 +131,7 @@ export async function POST(req) {
           {
             role: "system",
             content:
-              "Tu es un coach expert de padel. Tu réponds toujours uniquement en JSON valide.",
+              "Tu es un coach expert de padel. Tu réponds toujours en français et tu renvoies uniquement un JSON valide.",
           },
           {
             role: "user",
@@ -129,6 +143,8 @@ export async function POST(req) {
     });
 
     const data = await res.json().catch(() => null);
+
+    console.log("AI RAW RESPONSE:", JSON.stringify(data, null, 2));
 
     if (!res.ok) {
       return Response.json(
@@ -143,15 +159,20 @@ export async function POST(req) {
       );
     }
 
-    const text = data?.choices?.[0]?.message?.content?.trim() || "";
-    const parsed = safeJsonParse(text);
+    const rawText =
+      data?.choices?.[0]?.message?.content ||
+      data?.choices?.[0]?.text ||
+      data?.output?.[0]?.content?.[0]?.text ||
+      "";
+
+    const parsed = extractJsonObject(rawText);
 
     if (!parsed) {
       return Response.json(
         {
           success: false,
           error: "Réponse IA invalide.",
-          raw: text,
+          raw: rawText,
         },
         { status: 502 }
       );
