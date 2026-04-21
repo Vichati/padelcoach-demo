@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import {
   User,
@@ -19,6 +19,10 @@ import {
   Brain,
   Zap,
   TrendingUp,
+  Shield,
+  Lock,
+  Link2,
+  Eye,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +41,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 
+const APP_NAME = "Padelscan Pro";
+const APP_VERSION = "V3 private demo";
+const DEMO_ACCESS_TOKEN = "padelscan-pro-private-2026";
+const ACCESS_STORAGE_KEY = "padelscan_pro_demo_access";
+
 const WEBHOOK_URL_DEFAULT =
   "https://script.google.com/macros/s/AKfycbyIpYLnkm4Z5HqLEcaCwpit0HdDo7FKsOO6Hf8f2zNmUt_HuTtTCr8nrjtUzqgrF4_o/exec";
 const WEBHOOK_SECRET_DEFAULT = "padelcoach_2026_x9KpA71mZqL_secure";
@@ -54,7 +63,7 @@ const initialProfile = {
   niveau: "4",
   main: "Droitier",
   positionTerrain: "Côté Droit",
-  montreModele: "Apple Watch",
+  montreModele: "Apple Watch Ultra",
   dateInscription: "2026-04-19",
 };
 
@@ -112,7 +121,8 @@ const initialSessions = [
     resultat: "Victoire",
     fatigueAvant: 3,
     fatigueApres: 7,
-    notes: "Bonne intensité, service solide, gestion mentale correcte dans le super tie-break.",
+    notes:
+      "Bonne intensité, service solide, gestion mentale correcte dans le super tie-break.",
     forme: {
       id: "F_20260419_001",
       fcRepos: 58,
@@ -136,10 +146,12 @@ const initialSessions = [
     },
     conseils: {
       priorite: "Moyenne",
-      technique: "Travaille la première volée après service pour sécuriser la montée.",
+      technique:
+        "Travaille la première volée après service pour sécuriser la montée.",
       tactique: "Monte plus tôt au filet sur balle courte pour imposer le rythme.",
       physique: "Conserve l’intensité cardio au début du second set.",
-      recuperation: "Hydratation, retour au calme 10 min et mobilité épaules/ischios.",
+      recuperation:
+        "Hydratation, retour au calme 10 min et mobilité épaules/ischios.",
       pointFort: "Bon service dans les points importants.",
       pointFaible: "Transitions fond-filet encore hésitantes.",
       objectif: "Mieux convertir les balles d’attaque.",
@@ -237,7 +249,8 @@ const initialSessions = [
     conseils: {
       priorite: "Haute",
       technique: "Travaille le relâchement sur les frappes hautes en fin de match.",
-      tactique: "Très bonne lecture croisée, continue à fixer puis accélérer long de ligne.",
+      tactique:
+        "Très bonne lecture croisée, continue à fixer puis accélérer long de ligne.",
       physique: "Surveille la fatigue de l’épaule quand la charge dépasse 75 min.",
       recuperation: "Glace locale, mobilité douce et nuit de récupération complète.",
       pointFort: "Réaction mentale après la perte du premier set.",
@@ -506,14 +519,12 @@ function computeAiSummary(session) {
   if (Number(session.fatigueApres || 0) >= 8) fatigueRisk = "Élevé";
   else if (Number(session.fatigueApres || 0) >= 6) fatigueRisk = "Modéré";
 
-  const style =
-    session.resume?.typeDominant
-      ? `Dominante ${session.resume.typeDominant.toLowerCase()}`
-      : "Offensif côté droit";
+  const style = session.resume?.typeDominant
+    ? `Dominante ${session.resume.typeDominant.toLowerCase()}`
+    : "Offensif côté droit";
 
   const priority =
-    session.conseils?.objectif ||
-    "Stabiliser la transition défense → attaque";
+    session.conseils?.objectif || "Stabiliser la transition défense → attaque";
 
   const insight =
     session.resultat === "Victoire"
@@ -558,9 +569,46 @@ const fakeAiSuggestions = [
     objectif: "Réduire les fautes directes en fin de set.",
     priorite: "Moyenne",
   },
+  {
+    technique:
+      "Stabilise ton contact de balle sur les volées de transition pour sécuriser la prise du filet.",
+    tactique:
+      "Cherche plus souvent la zone revers adverse avant d’accélérer long de ligne.",
+    physique:
+      "Maintiens une intensité stable sur les changements d’appui du second set.",
+    recuperation:
+      "Hydratation, respiration basse et mobilité hanche/épaule pendant 8 minutes.",
+    pointFort: "Capacité à reprendre l’initiative dans les points serrés.",
+    pointFaible: "Qualité de replacement après frappe haute.",
+    objectif: "Améliorer la transition attaque → couverture du lob.",
+    priorite: "Haute",
+  },
 ];
 
-export default function PadelCoachV1App() {
+function getShareLink() {
+  if (typeof window === "undefined") return "";
+  const url = new URL(window.location.href);
+  url.searchParams.set("k", DEMO_ACCESS_TOKEN);
+  return url.toString();
+}
+
+function hasAccessFromStorage() {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(ACCESS_STORAGE_KEY) === DEMO_ACCESS_TOKEN;
+}
+
+function readTokenFromUrl() {
+  if (typeof window === "undefined") return "";
+  const url = new URL(window.location.href);
+  return url.searchParams.get("k") || "";
+}
+
+function grantAccess() {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(ACCESS_STORAGE_KEY, DEMO_ACCESS_TOKEN);
+}
+
+export default function PadelscanProV3App() {
   const [profile, setProfile] = useState(initialProfile);
   const [sessions, setSessions] = useState(initialSessions);
   const [selectedImport, setSelectedImport] = useState(mockImports[0]);
@@ -616,10 +664,30 @@ export default function PadelCoachV1App() {
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState({ type: "idle", message: "Prêt" });
   const [generatingAi, setGeneratingAi] = useState(false);
+  const [shareLink, setShareLink] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [accessInput, setAccessInput] = useState("");
+  const [accessReady, setAccessReady] = useState(false);
 
   const stats = useMemo(() => computeStats(sessions), [sessions]);
   const activeSession = sessions.find((s) => s.id === activeId) || sessions[0];
   const aiSummary = useMemo(() => computeAiSummary(activeSession), [activeSession]);
+
+  useEffect(() => {
+    const urlToken = readTokenFromUrl();
+    const stored = hasAccessFromStorage();
+
+    if (urlToken === DEMO_ACCESS_TOKEN) {
+      grantAccess();
+      setHasAccess(true);
+    } else if (stored) {
+      setHasAccess(true);
+    }
+
+    setShareLink(getShareLink());
+    setAccessReady(true);
+  }, []);
 
   const onProfileChange = (key, value) => setProfile((p) => ({ ...p, [key]: value }));
 
@@ -639,6 +707,26 @@ export default function PadelCoachV1App() {
       },
     }));
     setStatus({ type: "success", message: `Session importée depuis ${item.source}` });
+  };
+
+  const unlockWithCode = () => {
+    if (accessInput.trim() === DEMO_ACCESS_TOKEN) {
+      grantAccess();
+      setHasAccess(true);
+      setStatus({ type: "success", message: "Accès privé autorisé." });
+      return;
+    }
+    setStatus({ type: "error", message: "Lien ou code d’accès invalide." });
+  };
+
+  const copyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setStatus({ type: "error", message: "Impossible de copier le lien." });
+    }
   };
 
   const generateAiAdvice = async () => {
@@ -740,6 +828,76 @@ export default function PadelCoachV1App() {
     { title: "Fatigue moyenne", value: `${stats.fatigueMoy}/10`, icon: Activity },
   ];
 
+  if (!accessReady) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="mx-auto max-w-3xl space-y-6">
+          <Card className="rounded-3xl shadow-sm">
+            <CardContent className="p-8 md:p-10">
+              <div className="flex items-start gap-4">
+                <div className="rounded-2xl border p-3">
+                  <Lock className="h-6 w-6" />
+                </div>
+                <div className="space-y-3">
+                  <Badge variant="secondary">Accès privé</Badge>
+                  <h1 className="text-3xl font-semibold tracking-tight">{APP_NAME}</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Démo privée à accès limité. Ouvre l’application avec le lien privé complet
+                    ou saisis le code d’accès ci-dessous.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl border p-4">
+                  <p className="text-sm font-medium">Version</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{APP_VERSION}</p>
+                </div>
+                <div className="rounded-2xl border p-4">
+                  <p className="text-sm font-medium">Accès</p>
+                  <p className="mt-2 text-sm text-muted-foreground">Lien privé ou code temporaire</p>
+                </div>
+              </div>
+
+              <div className="mt-8 space-y-3">
+                <Label>Code d’accès</Label>
+                <Input
+                  value={accessInput}
+                  onChange={(e) => setAccessInput(e.target.value)}
+                  placeholder="Colle ici le code ou le token privé"
+                />
+                <Button className="rounded-2xl" onClick={unlockWithCode}>
+                  Déverrouiller la démo
+                </Button>
+              </div>
+
+              <div className="mt-8 rounded-2xl border p-4">
+                <div className="flex items-center gap-2">
+                  {status.type === "error" ? (
+                    <AlertCircle className="h-5 w-5" />
+                  ) : (
+                    <Shield className="h-5 w-5" />
+                  )}
+                  <p className="font-medium">Accès restreint</p>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Pour partager la démo, utilise uniquement le lien privé contenant le paramètre <code>k</code>.
+                </p>
+                {status.message !== "Prêt" && (
+                  <p className="mt-3 text-sm text-muted-foreground">{status.message}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -754,20 +912,39 @@ export default function PadelCoachV1App() {
                 <Dumbbell className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-3xl font-semibold tracking-tight">PadelCoach V2 demo</h1>
+                <h1 className="text-3xl font-semibold tracking-tight">{APP_NAME}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Plateforme de suivi padel avec import montre, analyse IA et synchronisation Google Sheets.
+                  Plateforme premium de suivi padel avec import montre, analyse IA et synchronisation Google Sheets.
                 </p>
               </div>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">{APP_VERSION}</Badge>
+            <Badge variant="secondary">Accès limité</Badge>
             <Badge variant="secondary">Analyse IA</Badge>
-            <Badge variant="secondary">Backend Google Sheets</Badge>
-            <Badge variant="secondary">Webhook Apps Script</Badge>
-            <Badge variant="secondary">V1 mobile/web</Badge>
+            <Badge variant="secondary">Google Sheets sync</Badge>
           </div>
         </motion.div>
+
+        <Card className="rounded-3xl shadow-sm">
+          <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-medium">Lien privé de démonstration</p>
+              <p className="mt-1 break-all text-sm text-muted-foreground">{shareLink}</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button className="rounded-2xl" variant="secondary" onClick={copyShareLink}>
+                <Link2 className="mr-2 h-4 w-4" />
+                {copied ? "Lien copié" : "Copier le lien privé"}
+              </Button>
+              <Badge variant="secondary" className="px-3 py-1">
+                <Eye className="mr-2 h-3.5 w-3.5" />
+                Partage restreint
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {statCards.map((card) => {
@@ -833,9 +1010,7 @@ export default function PadelCoachV1App() {
                       </div>
                     </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Aucune session disponible.
-                    </p>
+                    <p className="text-sm text-muted-foreground">Aucune session disponible.</p>
                   )}
                 </CardContent>
               </Card>
@@ -856,15 +1031,11 @@ export default function PadelCoachV1App() {
                   </div>
                   <div className="rounded-2xl border p-4">
                     <p className="text-sm font-medium">Synthèse intelligente</p>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {aiSummary.insight}
-                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">{aiSummary.insight}</p>
                   </div>
                   <div className="rounded-2xl border p-4">
                     <p className="text-sm font-medium">Recommandation prioritaire</p>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {aiSummary.priority}
-                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">{aiSummary.priority}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -1065,10 +1236,10 @@ export default function PadelCoachV1App() {
                     disabled={generatingAi}
                   >
                     <Sparkles className="mr-2 h-4 w-4" />
-                    {generatingAi ? "Analyse en cours..." : "Générer conseils IA"}
+                    {generatingAi ? "Analyse en cours..." : "Générer recommandations IA"}
                   </Button>
                   <Badge variant="secondary" className="px-3 py-1">
-                    Demo mode IA assistée
+                    Demo mode privé
                   </Badge>
                 </div>
 
@@ -1460,9 +1631,7 @@ export default function PadelCoachV1App() {
                       </div>
                     </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Sélectionne une session.
-                    </p>
+                    <p className="text-sm text-muted-foreground">Sélectionne une session.</p>
                   )}
                 </CardContent>
               </Card>
@@ -1506,11 +1675,7 @@ export default function PadelCoachV1App() {
                         setStatus({
                           type: "idle",
                           message: JSON.stringify(
-                            buildPayload(
-                              profile,
-                              draftToSession(draft, profile),
-                              webhookSecret
-                            ),
+                            buildPayload(profile, draftToSession(draft, profile), webhookSecret),
                             null,
                             2
                           ),
